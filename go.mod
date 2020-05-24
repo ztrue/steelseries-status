@@ -1,4 +1,4 @@
-module steelseries
+module github.com/ztrue/steelseries-status
 
 go 1.14
 
