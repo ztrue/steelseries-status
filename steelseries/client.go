@@ -6,17 +6,17 @@ import (
   "net/http"
 )
 
-type HttpClient interface {
+type HTTPClient interface {
   Do(*http.Request) (*http.Response, error)
 }
 
 type Client struct {
   addr string
   gameName string
-  httpClient HttpClient
+  httpClient HTTPClient
 }
 
-func NewClient(httpClient HttpClient, addr, gameName string) *Client {
+func NewClient(httpClient HTTPClient, addr, gameName string) *Client {
   return &Client{
     addr: addr,
     gameName: gameName,
