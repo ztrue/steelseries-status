@@ -1,9 +1,10 @@
+// https://steelseries.com/engine
+// https://github.com/SteelSeries/gamesense-sdk
+
 package main
 
 import (
-  "encoding/json"
   "net/http"
-  "os"
   "os/exec"
   "time"
 
@@ -12,44 +13,27 @@ import (
   "github.com/ztrue/steelseries-status/steelseries"
 )
 
-const corePropsPath = "/Library/Application Support/SteelSeries Engine 3/coreProps.json"
-
 const GameName = "GO_TESTS"
 const EventPass = "PASS"
 
 func main() {
-  if err := run(corePropsPath); err != nil {
+  if err := run(); err != nil {
     tracerr.PrintSourceColor(err)
   }
 }
 
-type CoreProps struct {
-  Address string `json:"address"`
-  EncryptedAddress string `json:"encrypted_address"`
-}
-
-func run(path string) error {
-  // TODO Check file exists
-
-  f, err := os.Open(path)
+func run() error {
+  d := steelseries.NewDiscoverer(steelseries.CorePropsPathMacos)
+  props, err := d.CoreProps()
   if err != nil {
     return tracerr.Wrap(err)
   }
-  defer f.Close()
-
-  var props CoreProps
-
-  if err := json.NewDecoder(f).Decode(&props); err != nil {
-    return tracerr.Wrap(err)
-  }
-
-  addr := props.Address
 
   httpClient := &http.Client{
     Timeout: 30 * time.Second,
   }
 
-  ss := steelseries.NewClient(httpClient, addr, GameName)
+  ss := steelseries.NewClient(httpClient, props.Address, GameName)
 
   event := ss.BuildBindGameEvent(EventPass)
   if err := ss.SendBindGameEvent(event); err != nil {
