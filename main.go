@@ -15,6 +15,8 @@ import (
 )
 
 const GameName = "GO_TESTS"
+const DisplayName = "Build Status"
+const Developer = "github.com/ztrue"
 const EventPass = "PASS"
 
 func main() {
@@ -38,6 +40,11 @@ func run() error {
 
   ss := steelseries.NewClient(httpClient, props.Address, GameName)
 
+  metadata := ss.BuildGameMetadata(DisplayName, Developer)
+  if err := ss.SendGameMetadata(metadata); err != nil {
+    return tracerr.Wrap(err)
+  }
+
   event := ss.BuildBindGameEvent(EventPass)
   if err := ss.SendBindGameEvent(event); err != nil {
     return tracerr.Wrap(err)
@@ -50,7 +57,9 @@ func run() error {
       value = 0
     }
     event := ss.BuildGameEvent(EventPass, value)
-    ss.SendGameEvent(event)
+    if err := ss.SendGameEvent(event); err != nil {
+      return tracerr.Wrap(err)
+    }
   }
 
   return nil

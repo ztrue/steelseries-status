@@ -16,7 +16,7 @@ type Client struct {
   httpClient HttpClient
 }
 
-func NewClient(httpClient HttpClient, addr string, gameName string) *Client {
+func NewClient(httpClient HttpClient, addr, gameName string) *Client {
   return &Client{
     addr: addr,
     gameName: gameName,
@@ -55,18 +55,41 @@ func (c *Client) BuildGameEvent(eventName string, value int) GameEvent {
   }
 }
 
-func (c *Client) SendBindGameEvent(event BindGameEvent) error {
-  return c.send("bind_game_event", event)
+func (c *Client) BuildGameMetadata(displayName, developer string) GameMetadata {
+  return GameMetadata{
+    Game: c.gameName,
+    GameDisplayName: displayName,
+    Developer: developer,
+    DeinitializeTimerLengthMS: 60000,
+  }
 }
 
-func (c *Client) SendGameEvent(event GameEvent) error {
-  return c.send("game_event", event)
+func (c *Client) SendBindGameEvent(data BindGameEvent) error {
+  return c.send("bind_game_event", data)
+}
+
+func (c *Client) SendGameEvent(data GameEvent) error {
+  return c.send("game_event", data)
+}
+
+func (c *Client) SendGameMetadata(data GameMetadata) error {
+  return c.send("game_metadata", data)
+}
+
+func (c *Client) SendStopGame() error {
+  data := Blank{
+    Game: c.gameName,
+  }
+  return c.send("stop_game", data)
 }
 
 func (c *Client) buildRequest(endpoint string, data interface{}) (*http.Request, error) {
   buf := &bytes.Buffer{}
-  if err := json.NewEncoder(buf).Encode(data); err != nil {
-    return nil, err
+
+  if data != nil {
+    if err := json.NewEncoder(buf).Encode(data); err != nil {
+      return nil, err
+    }
   }
 
   req, err := http.NewRequest("POST", c.buildURL(endpoint), buf)

@@ -7,6 +7,10 @@ const ModeColor = "color"
 var ColorGreen = RGB{0, 255, 0}
 var ColorRed = RGB{255, 0, 0}
 
+type Blank struct {
+  Game string `json:"game"`
+}
+
 type BindGameEvent struct {
   Game string `json:"game"`
   Event string `json:"event"`
@@ -50,6 +54,7 @@ type Data struct {
 }
 
 type GameMetadata struct {
+  Game string `json:"game"`
   GameDisplayName string `json:"game_display_name"`
   Developer string `json:"developer"`
   DeinitializeTimerLengthMS int `json:"deinitialize_timer_length_ms"`
