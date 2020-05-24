@@ -2,7 +2,6 @@ package main
 
 import (
   "encoding/json"
-  "log"
   "net/http"
   "os"
   "os/exec"
@@ -46,14 +45,14 @@ func run(path string) error {
 
   addr := props.Address
 
-  client := &http.Client{
+  httpClient := &http.Client{
     Timeout: 30 * time.Second,
   }
 
-  ss := steelseries.NewClient(addr, client, GameName)
-  log.Println(ss)
+  ss := steelseries.NewClient(httpClient, addr, GameName)
 
-  if err := ss.Register(EventPass); err != nil {
+  event := ss.BuildBindGameEvent(EventPass)
+  if err := ss.SendBindGameEvent(event); err != nil {
     return tracerr.Wrap(err)
   }
 
@@ -63,7 +62,8 @@ func run(path string) error {
     if !pass {
       value = 0
     }
-    ss.Update(EventPass, value)
+    event := ss.BuildGameEvent(EventPass, value)
+    ss.SendGameEvent(event)
   }
 
   return nil
