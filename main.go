@@ -8,6 +8,7 @@ import (
   "os/exec"
   "time"
 
+  "github.com/spf13/afero"
   "github.com/ztrue/tracerr"
 
   "github.com/ztrue/steelseries-status/steelseries"
@@ -23,7 +24,9 @@ func main() {
 }
 
 func run() error {
-  d := steelseries.NewDiscoverer(steelseries.CorePropsPathMacos)
+  fs := afero.NewOsFs()
+
+  d := steelseries.NewDiscoverer(fs, steelseries.CorePropsPathMacos)
   props, err := d.CoreProps()
   if err != nil {
     return tracerr.Wrap(err)

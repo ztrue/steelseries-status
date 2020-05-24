@@ -3,7 +3,8 @@ package steelseries
 import (
   "encoding/json"
   "errors"
-  "os"
+
+  "github.com/spf13/afero"
 )
 
 const CorePropsPathMacos = "/Library/Application Support/SteelSeries Engine 3/coreProps.json"
@@ -18,16 +19,18 @@ type CoreProps struct {
 
 type Discoverer struct {
   corePropsPath string
+  fs afero.Fs
 }
 
-func NewDiscoverer(corePropsPath string) *Discoverer {
+func NewDiscoverer(fs afero.Fs, corePropsPath string) *Discoverer {
   return &Discoverer{
     corePropsPath: corePropsPath,
+    fs: fs,
   }
 }
 
 func (d *Discoverer) CorePropsFileExists() bool {
-  _, err := os.Stat(d.corePropsPath)
+  _, err := d.fs.Stat(d.corePropsPath)
   return err == nil
 }
 
@@ -42,7 +45,7 @@ func (d *Discoverer) CoreProps() (CoreProps, error) {
 func (d *Discoverer) readCoreProps() (CoreProps, error) {
   var props CoreProps
 
-  f, err := os.Open(d.corePropsPath)
+  f, err := d.fs.Open(d.corePropsPath)
   if err != nil {
     return props, err
   }
